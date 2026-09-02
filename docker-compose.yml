@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: grs-smart-park-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: grs
+      POSTGRES_PASSWORD: grs_dev_password
+      POSTGRES_DB: grs_smart_park
+    ports:
+      - "5432:5432"
+    volumes:
+      - grs_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grs -d grs_smart_park"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  grs_postgres_data:

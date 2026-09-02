@@ -1,0 +1,34 @@
+# Dependencies / build
+node_modules
+.next
+out
+*.tsbuildinfo
+
+# Environment / secrets (keep .env.example trackable)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.env.preview
+.env.test
+.env.development
+.env.*
+!.env.example
+
+# Playwright / test artifacts
+test-results/
+playwright-report/
+coverage/
+
+# Logs
+npm-debug.log*
+*.log
+
+# Prisma local database files & stale migration backup
+prisma/*.db
+prisma/*.db-journal
+prisma/migrations_stale_backup/
+
+# OS
+.DS_Store

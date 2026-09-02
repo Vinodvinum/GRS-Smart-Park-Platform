@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  GUEST
+  STAFF
+  SUPERVISOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  USED
+  CANCELLED
+}
+
+enum RequestCategory {
+  LOST_FOUND
+  MEDICAL
+  LOCKER
+  FOOD
+  RIDE
+  CLEANING
+  GENERAL
+}
+
+enum RequestStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum QueueRisk {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AttractionStatus {
+  OPEN
+  CLOSED
+  MAINTENANCE
+  LIMITED
+}
+
+enum OfferStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  EXPIRED
+}
+
+enum FacilityType {
+  RESTROOM
+  LOCKER
+  CHANGING_ROOM
+  FOOD
+  MEDICAL
+  LOST_FOUND
+  PARKING
+  INFORMATION
+  OTHER
+}
+
+enum ServiceRequestStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum ServiceRequestPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum FeedbackRating {
+  ONE
+  TWO
+  THREE
+  FOUR
+  FIVE
+}
+
+model User {
+  id                String           @id @default(cuid())
+  name              String
+  email             String           @unique
+  role              UserRole         @default(GUEST)
+  passwordHash      String?
+  isActive          Boolean          @default(true)
+  passwordChangedAt DateTime?
+  lastLoginAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  bookings          Booking[]
+  requests          ServiceRequest[] @relation("CreatedRequests")
+  auditLogs         AuditLog[]
+}
+
+model Experience {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  shortName   String?
+  description String
+  imageUrl    String?
+  active      Boolean       @default(true)
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  attractions Attraction[]
+  bookings    Booking[]
+  offers      Offer[]
+}
+
+model Attraction {
+  id             String            @id @default(cuid())
+  experienceId   String
+  experience     Experience        @relation(fields: [experienceId], references: [id], onDelete: Restrict)
+  name           String
+  slug           String
+  description    String?
+  minHeightCm    Int?
+  status         AttractionStatus  @default(OPEN)
+  active         Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  queueSnapshots QueueSnapshot[]
+  @@unique([experienceId, slug])
+  @@index([experienceId, active])
+}
+
+model Facility {
+  id          String       @id @default(cuid())
+  name        String
+  type        FacilityType
+  location    String
+  description String?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  @@index([type, active])
+}
+
+model Offer {
+  id           String       @id @default(cuid())
+  experienceId String?
+  experience   Experience?  @relation(fields: [experienceId], references: [id], onDelete: SetNull)
+  code         String       @unique
+  name         String
+  description  String
+  price        Decimal      @db.Decimal(12,2)
+  status       OfferStatus  @default(DRAFT)
+  startsAt     DateTime?
+  endsAt       DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  @@index([status, startsAt, endsAt])
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  bookingCode  String        @unique
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  experienceId String
+  experience   Experience    @relation(fields: [experienceId], references: [id], onDelete: Restrict)
+  offerCode    String?
+  visitDate    DateTime
+  adults       Int
+  children     Int
+  amount       Decimal       @db.Decimal(12,2)
+  status       BookingStatus @default(PENDING)
+  qrPayload    String        @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  tickets      Ticket[]
+  digitalPass  DigitalPass?
+  requests     ServiceRequest[]
+  @@index([visitDate, status])
+  @@index([userId, createdAt])
+}
+
+model Ticket {
+  id         String   @id @default(cuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  ticketCode String   @unique
+  guestType  String
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+  @@index([bookingId])
+}
+
+model DigitalPass {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  tokenHash     String   @unique
+  issuedAt      DateTime @default(now())
+  expiresAt     DateTime
+  lastScannedAt DateTime?
+  revokedAt     DateTime?
+}
+
+model ServiceRequest {
+  id              String                @id @default(cuid())
+  requestCode     String                @unique
+  bookingId       String?
+  booking         Booking?              @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  userId          String?
+  createdBy       User?                 @relation("CreatedRequests", fields: [userId], references: [id], onDelete: SetNull)
+  assignedTo      String?
+  category        String
+  location        String?
+  description     String
+  status          ServiceRequestStatus  @default(OPEN)
+  priority        ServiceRequestPriority @default(MEDIUM)
+  resolvedAt      DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  updates         ServiceRequestUpdate[]
+  feedback        Feedback?
+  @@index([status])
+  @@index([bookingId])
+  @@index([createdAt])
+}
+
+model ServiceRequestUpdate {
+  id               String        @id @default(cuid())
+  serviceRequestId String
+  status           ServiceRequestStatus
+  note             String?
+  actorName        String?
+  createdAt        DateTime      @default(now())
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  @@index([serviceRequestId, createdAt])
+}
+
+model Feedback {
+  id              String        @id @default(cuid())
+  serviceRequestId String       @unique
+  rating          FeedbackRating
+  comment         String?
+  createdAt       DateTime      @default(now())
+  serviceRequest  ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+}
+
+model Zone {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  maxCapacity    Int
+  active         Boolean         @default(true)
+  queueSnapshots QueueSnapshot[]
+}
+
+model QueueSnapshot {
+  id               String           @id @default(cuid())
+  zoneId           String
+  zone             Zone             @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  attractionId     String?
+  attraction       Attraction?      @relation(fields: [attractionId], references: [id], onDelete: SetNull)
+  observedAt       DateTime
+  predictedMinutes Float
+  riskLevel        QueueRisk
+  slaBreach        Boolean          @default(false)
+  @@index([zoneId, observedAt])
+  @@index([attractionId, observedAt])
+}
+
+model Incident {
+  id           String    @id @default(cuid())
+  incidentCode String    @unique
+  zoneId       String?
+  title        String
+  description  String
+  location     String?
+  severity     String
+  status       String    @default("OPEN")
+  assignedTo   String?
+  createdAt    DateTime  @default(now())
+  resolvedAt   DateTime?
+  @@index([status])
+  @@index([zoneId, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+}

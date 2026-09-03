@@ -6,5 +6,6 @@ import { STAFF_ROLES } from "@/lib/rbac";
 export async function GET() {
   const guard = await requireApiRole(STAFF_ROLES);
   if (isGuardFailure(guard)) return guard.response;
-  return NextResponse.json({ data: getOperationsSnapshot() });
+  const data = await getOperationsSnapshot();
+  return NextResponse.json({ data });
 }

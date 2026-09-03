@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Loader2, Lock, Mail, User, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, Loader2, Lock, Mail, User, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -13,6 +13,8 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   function validate() {
     if (!name.trim() || name.trim().length < 2) return 'Enter your full name.'
@@ -20,13 +22,6 @@ export default function RegisterPage() {
     if (password.length < 8) return 'Password must be at least 8 characters.'
     if (password !== confirm) return 'Passwords do not match.'
     return ''
-  }
-
-  function submitFeedback(event: React.FormEvent<HTMLInputElement>) {
-    const el = event.currentTarget
-    if (el.value !== confirm) el.setCustomValidity('Passwords do not match.')
-    else if (el.value.length < 8) el.setCustomValidity('Password must be at least 8 characters.')
-    else el.setCustomValidity('')
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -81,16 +76,16 @@ export default function RegisterPage() {
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, fontWeight: 700 }}>
               Password
               <span className="inputLike" style={{ alignItems: 'center' }}><Lock size={15} /><input
-                type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters"
+                type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters"
                 autoComplete="new-password" required minLength={8} style={{ border: 0, outline: 'none', flex: 1, fontSize: 14 }}
-              /></span>
+              /><button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', display: 'grid', placeItems: 'center', padding: '0 6px' }}>{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button></span>
             </label>
             <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, fontWeight: 700 }}>
               Confirm password
               <span className="inputLike" style={{ alignItems: 'center' }}><Lock size={15} /><input
-                type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat your password"
-                autoComplete="new-password" required minLength={8} onInput={submitFeedback} style={{ border: 0, outline: 'none', flex: 1, fontSize: 14 }}
-              /></span>
+                type={showConfirm ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat your password"
+                autoComplete="new-password" required minLength={8} style={{ border: 0, outline: 'none', flex: 1, fontSize: 14 }}
+              /><button type="button" onClick={() => setShowConfirm(v => !v)} aria-label={showConfirm ? 'Hide password' : 'Show password'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', display: 'grid', placeItems: 'center', padding: '0 6px' }}>{showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}</button></span>
             </label>
 
             <button className="primary fullButton" disabled={loading}>

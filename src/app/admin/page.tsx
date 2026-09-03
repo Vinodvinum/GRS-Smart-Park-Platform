@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Building2, ChevronRight, ClipboardList, Database, Gift, LayoutDashboard, MapPinned, Settings, ShieldCheck, Sparkles, Users, Waves, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building2, ChevronRight, ClipboardList, Gift, LayoutDashboard, MapPinned, Settings, ShieldCheck, Sparkles, Users, Waves, RefreshCw } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Brand } from "@/components/Brand";
 
@@ -14,10 +14,12 @@ const menus: Array<[string, string, LucideIcon]> = [
 
 type AdminData = {
   experiences: { id: string; name: string; type: string; status: string; sortOrder: number }[];
-  attractions: { id: string; name: string; zone: string; status: string; capacity: number }[];
+  attractions: { id: string; name: string; zone: string; status: string }[];
   zones: string[];
   facilities: string[];
   offers: { id: string; name: string; type: string; status: string }[];
+  users: { id: string; name: string; email: string; role: string; isActive: boolean; createdAt: string }[];
+  auditLogs: { id: string; action: string; entityType: string; entityId: string | null; actorName: string; actorRole: string | null; createdAt: string; metadata: unknown }[];
   settings: { parkName: string; timezone: string; currency: string };
 };
 
@@ -57,20 +59,21 @@ function Overview({ data, onAction }: { data: AdminData | null; onAction: (tab: 
   const cards: Array<[string, string, string, LucideIcon]> = [
     ["Experiences", "Manage guest-facing park products.", "experiences", Sparkles], ["Attractions", "Control operational attraction metadata.", "attractions", Waves],
     ["Offers", "Review commercial packages.", "offers", Gift], ["Facilities", "Maintain guest facility directory.", "facilities", Building2],
-    ["Users & Roles", "Manage staff access governance.", "users", Users], ["Audit Logs", "Review privileged activity history.", "audit", ClipboardList],
+    ["Users & Roles", "Review access governance.", "users", Users], ["Audit Logs", "Review privileged activity history.", "audit", ClipboardList],
   ];
   return <><div className="statGrid">
     <div className="stat"><span><Sparkles size={15}/> Experiences</span><strong>{data?.experiences.length ?? "—"}</strong><small className="good">Catalogue</small></div>
     <div className="stat"><span><Waves size={15}/> Attractions</span><strong>{data?.attractions.length ?? "—"}</strong><small>Configured</small></div>
     <div className="stat"><span><Gift size={15}/> Offers</span><strong>{data?.offers.length ?? "—"}</strong><small>Commercial</small></div>
-    <div className="stat"><span><ShieldCheck size={15}/> Admin roles</span><strong>4</strong><small>RBAC foundation</small></div>
+    <div className="stat"><span><Users size={15}/> Users</span><strong>{data?.users.length ?? "—"}</strong><small>Access directory</small></div>
   </div><div className="adminCards">{cards.map(([a,b,id,I]) => <button className="adminCard" key={id} onClick={() => onAction(id)}><span className="toolIcon"><I size={17}/></span><span><b>{a}</b><small>{b}</small></span><ArrowRight size={15}/></button>)}</div></>;
 }
 
 function AdminPanel({ tab, data }: { tab: string; data: AdminData | null }) {
-  if (["users", "audit"].includes(tab)) return <section className="opsPanel adminTable"><div className="kicker">GOVERNANCE</div><h3>{tab === "users" ? "Users & Roles" : "Audit Logs"}</h3><div className="emptyState">The secure backend boundary exists, but this management view is intentionally not presenting fake records. The next admin increment should connect this screen to the persisted User/AuditLog data with server-side authorization and pagination.</div></section>;
-  if (tab === "settings") return <section className="opsPanel adminTable"><div className="kicker">SYSTEM SETTINGS</div><h3>Platform configuration</h3><div className="adminTableRow"><b>Park name</b><span>{data?.settings.parkName ?? "—"}</span><span className="status low">READ ONLY</span></div><div className="adminTableRow"><b>Timezone</b><span>{data?.settings.timezone ?? "—"}</span><span className="status low">READ ONLY</span></div><div className="adminTableRow"><b>Currency</b><span>{data?.settings.currency ?? "—"}</span><span className="status low">READ ONLY</span></div></section>;
   if (!data) return <section className="opsPanel adminTable"><div className="emptyState">Loading admin data…</div></section>;
+  if (tab === "users") return <section className="opsPanel adminTable"><TableHead title="Users & Roles"/><div className="adminTableHead"><span>User</span><span>Role</span><span>Status</span></div>{data.users.map(u => <div className="adminTableRow" key={u.id}><div><b>{u.name}</b><small>{u.email}</small></div><span className="status low">{u.role}</span><span className={`status ${u.isActive ? "low" : "high"}`}>{u.isActive ? "ACTIVE" : "DISABLED"}</span></div>)}</section>;
+  if (tab === "audit") return <section className="opsPanel adminTable"><TableHead title="Audit Logs"/><div className="adminTableHead"><span>Action</span><span>Actor</span><span>Entity</span></div>{data.auditLogs.length === 0 && <div className="emptyState">No audit events have been recorded yet.</div>}{data.auditLogs.map(log => <div className="adminTableRow" key={log.id}><div><b>{log.action}</b><small>{new Date(log.createdAt).toLocaleString()}</small></div><span>{log.actorName}</span><span>{log.entityType}{log.entityId ? ` · ${log.entityId.slice(0, 10)}` : ""}</span></div>)}</section>;
+  if (tab === "settings") return <section className="opsPanel adminTable"><div className="kicker">SYSTEM SETTINGS</div><h3>Platform configuration</h3><div className="adminTableRow"><b>Park name</b><span>{data.settings.parkName}</span><span className="status low">READ ONLY</span></div><div className="adminTableRow"><b>Timezone</b><span>{data.settings.timezone}</span><span className="status low">READ ONLY</span></div><div className="adminTableRow"><b>Currency</b><span>{data.settings.currency}</span><span className="status low">READ ONLY</span></div></section>;
   if (tab === "zones") return <section className="opsPanel adminTable"><TableHead title="Zones"/><div className="adminTableHead"><span>Name</span><span>Type</span><span>Status</span></div>{data.zones.map(z => <div className="adminTableRow" key={z}><b>{z}</b><span>Park zone</span><span className="status low">ACTIVE</span></div>)}</section>;
   if (tab === "facilities") return <section className="opsPanel adminTable"><TableHead title="Facilities"/><div className="adminTableHead"><span>Name</span><span>Context</span><span>Status</span></div>{data.facilities.map(f => <div className="adminTableRow" key={f}><b>{f}</b><span>Guest Services</span><span className="status low">ACTIVE</span></div>)}</section>;
   if (tab === "experiences") return <section className="opsPanel adminTable"><TableHead title="Experiences"/><div className="adminTableHead"><span>Name</span><span>Type</span><span>Status</span></div>{data.experiences.map(e => <div className="adminTableRow" key={e.id}><b>{e.name}</b><span>{e.type}</span><span className="status low">{e.status}</span></div>)}</section>;

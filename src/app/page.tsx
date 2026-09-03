@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { guestExperiences } from '@/lib/guest-data'
 import { AuthStatus } from '@/components/AuthStatus'
+import { Brand } from '@/components/Brand'
 
 const stats = [
   ['4', 'Experiences'],
@@ -15,7 +16,7 @@ export default function HomePage() {
   return (
     <main>
       <nav className="topbar container">
-        <Link href="/" className="brand"><span className="brand-mark">G</span><span>GRS <b>SMART PARK</b></span></Link>
+        <Brand />
         <div className="navlinks">
           <Link href="/experiences" className="navlink">Experiences</Link>
           <Link href="/plan" className="navlink">Plan My Visit</Link>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Headphones, LockKeyhole, Search, Stethoscope, Sparkles, Utensils, Waves } from "lucide-react";
+import { ArrowRight, Headphones, LockKeyhole, Search, Stethoscope, Utensils, Waves } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GuestNav } from "@/components/GuestNav";
 import { DemoBanner } from "@/components/DemoBanner";
@@ -14,40 +14,9 @@ const services: Array<[string, string, string, LucideIcon]> = [
 ];
 
 export default function HelpPage() {
-  return (
-    <>
-      <DemoBanner />
-      <GuestNav />
-      <main className="page">
-        <div className="container">
-          <div className="pageTitle">
-            <div className="kicker">GUEST SUPPORT</div>
-            <h1>Need a hand?</h1>
-            <p>Raise a request and let the right team take it from there. This phase establishes the service workflow contract; authentication and staff assignment come later.</p>
-          </div>
-          <div className="helpGrid">
-            {services.map(([name, desc, category, Icon]) => {
-              const ServiceIcon = Icon as typeof Search;
-              return (
-                <Link className="card helpCard" href={`/help/new?category=${category}`} key={String(category)}>
-                  <span className="quickIcon"><ServiceIcon size={19}/></span>
-                  <b>{name}</b>
-                  <p>{desc}</p>
-                  <ArrowRight size={16}/>
-                </Link>
-              );
-            })}
-          </div>
-          <div style={{marginTop:22}} className="card placeholder">
-            <div>
-              <div className="placeholderIcon"><Sparkles size={22}/></div>
-              <h2>Already raised a request?</h2>
-              <p>Open My Visit to review demo request status and the service timeline.</p>
-              <Link className="primary" href="/my-visit" style={{marginTop:16}}>Open My Visit <ArrowRight size={15}/></Link>
-            </div>
-          </div>
-        </div>
-      </main>
-    </>
-  );
+  return <><DemoBanner/><GuestNav/><main className="page"><div className="container">
+    <div className="pageTitle"><div className="kicker">GUEST SUPPORT</div><h1>Need a hand?</h1><p>Choose what you need help with. Your request is saved to your visit and can be followed from My Visit.</p></div>
+    <div className="helpGrid">{services.map(([name, desc, category, Icon])=><Link className="card helpCard" href={`/help/new?category=${category}`} key={category}><span className="quickIcon"><Icon size={19}/></span><b>{name}</b><p>{desc}</p><ArrowRight size={16}/></Link>)}</div>
+    <div style={{marginTop:22}} className="card placeholder"><div><h2>Already raised a request?</h2><p>Open My Visit to see its current status and service timeline.</p><Link className="primary" href="/my-visit" style={{marginTop:16}}>Open My Visit <ArrowRight size={15}/></Link></div></div>
+  </div></main></>;
 }

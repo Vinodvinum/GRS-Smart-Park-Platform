@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { guestExperiences } from '@/lib/guest-data'
 import { AuthStatus } from '@/components/AuthStatus'
 
@@ -50,9 +51,9 @@ export default function HomePage() {
       <section className="section container" id="platform">
         <div className="section-head"><div><span className="eyebrow">ONE CONNECTED PLATFORM</span><h2>Everything around the visit.</h2></div><p>Guest experience on the front. Operations intelligence behind it.</p></div>
         <div className="experience-grid">
-          {guestExperiences.map((x, i) => <Link href={`/experiences/${x.id}`} className={`experience-card card-${i}`} key={x.id}>
+          {guestExperiences.map((x, i) => <Link href={`/experiences/${x.id}`} className={`card experience experience-full card-${i}`} key={x.id}>
             <div className="experienceImage" style={{ backgroundImage: `url(${x.image})` }} aria-hidden="true" />
-            <div className="experienceCardCopy"><span className="number">0{i + 1}</span><div><h3>{x.name}</h3><p>{x.description}</p></div><span className="arrow">↗</span></div>
+            <div className="experienceBody"><div><b>{x.name}</b><small>{x.category}</small><p>{x.description}</p></div><ArrowRight size={17} /></div>
           </Link>)}
         </div>
       </section>

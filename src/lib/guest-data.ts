@@ -31,8 +31,8 @@ export const guestExperiences: ExperienceItem[] = [
     id:'selfie-factory',
     name:'Selfie Factory',
     category:'Create & Capture',
-    description:'Make memories, capture moments and share the day.',
-    image:'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=85',
+    description:'20+ themed photo sets designed for memorable photos and videos.',
+    image:'https://grsfantasypark.com/wp-content/uploads/2026/05/Untitled-design-69.png',
     accent:'#e2a83a'
   },
 ]

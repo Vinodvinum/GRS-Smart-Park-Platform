@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { ArrowLeft, ArrowRight, Loader2, Lock, Mail, ShieldCheck } from 'lucide-react'
+import { Brand } from '@/components/Brand'
 
 export default function LoginPage() {
   return (
@@ -17,7 +18,7 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') ?? '/'
+  const requestedNext = searchParams.get('next')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -35,7 +36,21 @@ function LoginForm() {
         setError('Invalid email or password, or your account is unavailable.')
         return
       }
-      router.push(next)
+
+      if (requestedNext) {
+        router.push(requestedNext)
+        return
+      }
+
+      const sessionResponse = await fetch('/api/auth/session', { cache: 'no-store' })
+      const session = sessionResponse.ok ? await sessionResponse.json() : null
+      const role = session?.user?.role
+      const destination = role === 'ADMIN'
+        ? '/admin'
+        : role === 'STAFF' || role === 'SUPERVISOR'
+          ? '/operations'
+          : '/guest'
+      router.push(destination)
     } catch {
       setError('Something went wrong. Try again.')
     } finally {
@@ -46,7 +61,7 @@ function LoginForm() {
   return (
     <main className="page" style={{ background: 'linear-gradient(180deg,#0e1a33 0%,#101827 42%,#f6f8fc 42.5%,#f6f8fc 100%)' }}>
       <div className="container" style={{ maxWidth: 460 }}>
-        <Link href="/" className="brand" style={{ display: 'inline-flex', margin: '34px 0 6px' }}><span className="brand-mark">G</span><span>GRS <b>SMART PARK</b></span></Link>
+        <Brand dark />
 
         <div className="card" style={{ marginTop: 18, padding: 30 }}>
           <div className="kicker">SECURE ACCESS</div>

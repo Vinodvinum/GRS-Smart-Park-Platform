@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -122,7 +123,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="heroVisual">
+        <div className="heroVisual heroVisualPhoto">
+          <Image src="https://grsfantasypark.com/wp-content/uploads/2023/11/Fun-Family-water-park-jpg.webp" alt="GRS Fantasy Park water rides" fill priority sizes="(max-width: 1000px) 100vw, 50vw" className="heroActualImage" />
+          <div className="heroImageShade" />
           <div className="heroGlow heroGlowA" />
           <div className="heroGlow heroGlowB" />
           <div className="heroScene">

@@ -126,37 +126,6 @@ export default function HomePage() {
         <div className="heroVisual heroVisualPhoto">
           <Image src="https://grsfantasypark.com/wp-content/uploads/2023/11/Fun-Family-water-park-jpg.webp" alt="GRS Fantasy Park water rides" fill priority sizes="(max-width: 1000px) 100vw, 50vw" className="heroActualImage" />
           <div className="heroImageShade" />
-          <div className="heroGlow heroGlowA" />
-          <div className="heroGlow heroGlowB" />
-          <div className="heroScene">
-            <div className="sceneTop">
-              <span className="sceneLabel">LIVE PARK VIEW</span>
-              <span className="sceneStatus"><CircleDot size={9} /> Connected</span>
-            </div>
-
-            <div className="sceneSky">
-              <div className="sunOrb" />
-              <div className="cloud cloudOne" />
-              <div className="cloud cloudTwo" />
-              <div className="ride rideOne" />
-              <div className="ride rideTwo" />
-              <div className="waterBand waterOne" />
-              <div className="waterBand waterTwo" />
-            </div>
-
-            <div className="sceneOverlay">
-              <div>
-                <span>NOW</span>
-                <strong>Make the next hour count.</strong>
-              </div>
-              <div className="sceneMini">
-                <Users size={14} />
-                <span>Guest flow</span>
-                <b>Live</b>
-              </div>
-            </div>
-          </div>
-
           <div className="heroFloatCard floatOne">
             <div className="floatIcon"><QrCode size={16} /></div>
             <div>
